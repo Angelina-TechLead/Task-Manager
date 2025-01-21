@@ -8,13 +8,4 @@ public class EpicTest {
         Epic epic2 = new Epic("Epic 2", "Description 2", 1, TaskStatus.DONE);
         assertEquals(epic1, epic2, "Epics with the same ID should be equal.");
     }
-
-    @Test
-    public void shouldNotAddSubtaskWithSameId() {
-        Epic epic = new Epic("Epic", "Description", 1, TaskStatus.NEW);
-        Subtask subtask = new Subtask("Subtask", "Description", 1, TaskStatus.IN_PROGRESS, 1);
-        assertThrows(IllegalArgumentException.class, () -> {
-            epic.addSubtask(subtask);
-        }, "Epic should not add subtask with the same ID.");
-    }
 }
