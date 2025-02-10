@@ -5,12 +5,14 @@ public class Task {
     protected int id;
     protected String description;
     protected TaskStatus status;
+    protected String type;
 
     public Task(String name, String description, int id, TaskStatus status) {
         this.name = name;
         this.description = description;
         this.id = id;
         this.status = status;
+        this.type = "Task";
     }
 
     public String getName() {
@@ -27,6 +29,10 @@ public class Task {
 
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public TaskStatus getStatus() {
@@ -55,5 +61,9 @@ public class Task {
         return "Task{" +
                 "id=" + id +
                 '}';
+    }
+
+    public Object getType() {
+        return type;
     }
 }
