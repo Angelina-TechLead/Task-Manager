@@ -8,6 +8,27 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.file = file;
     }
 
+    // Метод загрузки из файла
+    public static FileBackedTaskManager loadFromFile(File file) {
+        FileBackedTaskManager manager = new FileBackedTaskManager(file);
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line = reader.readLine(); // Пропустить заголовок
+            while ((line = reader.readLine()) != null) {
+                Task task = fromString(line);
+                if (task instanceof Epic) {
+                    manager.addEpic((Epic) task);
+                } else if (task instanceof Subtask) {
+                    manager.addSubtask((Subtask) task);
+                } else {
+                    manager.addTask(task);
+                }
+            }
+        } catch (IOException e) {
+            throw new ManagerSaveException("Ошибка загрузки задачи из файла", e);
+        }
+        return manager;
+    }
+
     @Override
     public void addTask(Task task) {
         super.addTask(task);
@@ -104,27 +125,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 task.getDescription(),
                 task instanceof Subtask ? ((Subtask) task).getEpicId() : 0
         );
-    }
-
-    // Метод загрузки из файла
-    public static FileBackedTaskManager loadFromFile(File file) {
-        FileBackedTaskManager manager = new FileBackedTaskManager(file);
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line = reader.readLine(); // Пропустить заголовок
-            while ((line = reader.readLine()) != null) {
-                Task task = fromString(line);
-                if (task instanceof Epic) {
-                    manager.addEpic((Epic) task);
-                } else if (task instanceof Subtask) {
-                    manager.addSubtask((Subtask) task);
-                } else {
-                    manager.addTask(task);
-                }
-            }
-        } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка загрузки задачи из файла", e);
-        }
-        return manager;
     }
 
     // Метод fromString(String value)
