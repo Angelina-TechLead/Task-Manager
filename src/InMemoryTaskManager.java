@@ -1,3 +1,5 @@
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -163,17 +165,29 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void updateStatus(Epic task) {
-        if (subtasks.isEmpty()) {
+        if (task.getSubtasks().isEmpty()) {
             task.setStatus(TaskStatus.NEW);
+            task.setDuration(Duration.ZERO);
+            task.setStartTime(null);
         } else {
             boolean allDone = true;
             boolean allNew = true;
+            Duration totalDuration = Duration.ZERO;
+            LocalDateTime startTime = null;
+            LocalDateTime endTime = null;
             for (Subtask subtask : task.getSubtasks()) {
                 if (subtask.getStatus() != TaskStatus.DONE) {
                     allDone = false;
                 }
                 if (subtask.getStatus() != TaskStatus.NEW) {
                     allNew = false;
+                }
+                totalDuration = totalDuration.plus(subtask.getDuration());
+                if (startTime == null || subtask.getStartTime().isBefore(startTime)) {
+                    startTime = subtask.getStartTime();
+                }
+                if (endTime == null || subtask.getEndTime().isAfter(endTime)) {
+                    endTime = subtask.getEndTime();
                 }
             }
             if (allDone) {
@@ -183,6 +197,8 @@ public class InMemoryTaskManager implements TaskManager {
             } else {
                 task.setStatus(TaskStatus.IN_PROGRESS);
             }
+            task.setDuration(totalDuration);
+            task.setStartTime(startTime);
         }
     }
 }

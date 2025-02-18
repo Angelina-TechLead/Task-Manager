@@ -1,4 +1,6 @@
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -8,7 +10,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.file = file;
     }
 
-    // Метод загрузки из файла
     public static FileBackedTaskManager loadFromFile(File file) {
         FileBackedTaskManager manager = new FileBackedTaskManager(file);
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -88,10 +89,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return super.getHistory();
     }
 
-    // Метод автосохранения
     private void save() {
         try (FileWriter writer = new FileWriter(file, false)) {
-            writer.write("id,type,name,status,description,epic\n");
+            writer.write("id,type,name,status,description,duration,startTime,epic\n");
             for (Task task : getAllTasks()) {
                 writer.write(toString(task));
                 writer.write("\n");
@@ -109,7 +109,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    // Метод toString(Task task)
     private String toString(Task task) {
         String type = "TASK";
         if (task instanceof Epic) {
@@ -117,17 +116,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         } else if (task instanceof Subtask) {
             type = "SUBTASK";
         }
-        return String.format("%d,%s,%s,%s,%s,%d",
+        return String.format("%d,%s,%s,%s,%s,%d,%s,%d",
                 task.getId(),
                 type,
                 task.getName(),
                 task.getStatus(),
                 task.getDescription(),
+                task.getDuration().toMinutes(),
+                task.getStartTime(),
                 task instanceof Subtask ? ((Subtask) task).getEpicId() : 0
         );
     }
 
-    // Метод fromString(String value)
     private static Task fromString(String value) {
         String[] parts = value.split(",");
         int id = Integer.parseInt(parts[0]);
@@ -135,18 +135,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = parts[2];
         TaskStatus status = TaskStatus.valueOf(parts[3]);
         String description = parts[4];
-        int epicId = parts.length > 5 ? Integer.parseInt(parts[5]) : 0;
+        Duration duration = Duration.ofMinutes(Long.parseLong(parts[5]));
+        LocalDateTime startTime = LocalDateTime.parse(parts[6]);
+        int epicId = parts.length > 7 ? Integer.parseInt(parts[7]) : 0;
 
         switch (type) {
             case "TASK":
-                return new Task(name, description, id, status);
+                return new Task(name, description, id, status, duration, startTime);
             case "EPIC":
                 return new Epic(name, description, id, status);
             case "SUBTASK":
-                return new Subtask(name, description, id, status, epicId);
+                return new Subtask(name, description, id, status, epicId, duration, startTime);
             default:
-                throw new IllegalArgumentException("Неизвестный типа задачи: " + type);
+                throw new IllegalArgumentException("Неизвестный тип задачи: " + type);
         }
     }
 }
-
