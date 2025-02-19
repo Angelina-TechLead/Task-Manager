@@ -2,8 +2,8 @@ import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private Map<Integer, Task> tasks;
-    private Map<Integer, Node> nodeMap;
+    private final Map<Integer, Task> tasks;
+    private final Map<Integer, Node> nodeMap;
     private Node head;
     private Node tail;
     private int idCounter;
@@ -45,14 +45,18 @@ public class InMemoryHistoryManager implements HistoryManager {
         task.setId(idCounter++);
         tasks.put(task.getId(), task);
         Node newNode = new Node(task.getId(), task);
+
+        if (Objects.equals(head, newNode)) {
+            return;
+        }
+
         if (head == null) {
             head = newNode;
-            tail = newNode;
         } else {
             tail.next = newNode;
             newNode.prev = tail;
-            tail = newNode;
         }
+        tail = newNode;
         nodeMap.put(task.getId(), newNode);
     }
 

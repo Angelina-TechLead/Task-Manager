@@ -9,7 +9,7 @@ public class Subtask extends Task {
         this.epicId = epicId;
     }
 
-    public void setEpicId(int epicId) {
+    public void setEpicId(Integer epicId) {
         this.epicId = epicId;
     }
 

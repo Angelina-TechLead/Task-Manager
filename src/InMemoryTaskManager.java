@@ -1,6 +1,7 @@
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Task> tasks;
@@ -15,6 +16,37 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks = new HashMap<>();
         idCounter = 1;
         historyManager = new InMemoryHistoryManager();
+    }
+
+    public List<Task> getPrioritizedTasks() {
+        return tasks.values().stream()
+                .sorted(Comparator.comparing(Task::getStartTime))
+                .collect(Collectors.toList());
+    }
+
+    public boolean isTimeOverlap(Task task1, Task task2) {
+        LocalDateTime start1 = task1.getStartTime();
+        LocalDateTime end1 = task1.getEndTime();
+        LocalDateTime start2 = task2.getStartTime();
+        LocalDateTime end2 = task2.getEndTime();
+
+        return !(end1.isBefore(start2) || start1.isAfter(end2));
+    }
+
+    @Override
+    public void addTask(Task task) {
+        if (tasks.values().stream().anyMatch(existingTask -> isTimeOverlap(task, existingTask))) {
+            throw new IllegalArgumentException("Задача пересекается по времени выполнения с другой задачей");
+        }
+        task.setId(idCounter++);
+        tasks.put(task.getId(), task);
+    }
+
+    @Override
+    public List<Subtask> getSubtasksOfEpic(int epicId) {
+        return subtasks.values().stream()
+                .filter(subtask -> subtask.getEpicId() == epicId)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -77,12 +109,6 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.add(subtask);
         }
         return subtask;
-    }
-
-    @Override
-    public void addTask(Task task) {
-        task.setId(idCounter++);
-        tasks.put(task.getId(), task);
     }
 
     @Override
@@ -153,11 +179,6 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
-    public List<Subtask> getSubtasksOfEpic(int epicId) {
-        Epic epic = epics.get(epicId);
-        return epic != null ? epic.getSubtasks() : Collections.emptyList();
-    }
 
     @Override
     public List<Task> getHistory() {

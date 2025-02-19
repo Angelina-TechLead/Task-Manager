@@ -1,7 +1,7 @@
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDateTime;
 
 public class Epic extends Task {
     private List<Subtask> subtasks;
@@ -19,6 +19,31 @@ public class Epic extends Task {
     public void addSubtask(Subtask subtask) {
         subtasks.add(subtask);
         updateEpicDetails();
+    }
+
+    public boolean unlinkSubtask(int id) {
+        for (Subtask subtask : subtasks) {
+            if (subtask.getId() == id) {
+                subtask.setEpicId(null);
+                subtasks.remove(subtask);
+                calculateStatus();
+                updateEpicDetails();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void calculateStatus() {
+        boolean isNew = true;
+        boolean isDone = true;
+        for (Subtask subtask : subtasks) {
+            if (subtask.getStatus() != TaskStatus.NEW) isNew = false;
+            if (subtask.getStatus() != TaskStatus.DONE) isDone = false;
+        }
+        if (isNew) status = TaskStatus.NEW;
+        else if (isDone) status = TaskStatus.DONE;
+        else status = TaskStatus.IN_PROGRESS;
     }
 
     private void updateEpicDetails() {
@@ -48,6 +73,9 @@ public class Epic extends Task {
                 ", id=" + id +
                 ", description='" + description + '\'' +
                 ", status=" + status +
+                ", duration=" + duration +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
                 ", subtasks=" + subtasks +
                 '}';
     }

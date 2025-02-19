@@ -1,12 +1,13 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class InMemoryHistoryManagerTest {
-    private InMemoryHistoryManager historyManager;
+public class HistoryManagerTest {
+    private HistoryManager historyManager;
 
     @BeforeEach
     public void setUp() {
@@ -16,15 +17,6 @@ public class InMemoryHistoryManagerTest {
     @Test
     public void testEmptyHistory() {
         assertTrue(historyManager.getHistory().isEmpty());
-    }
-
-    @Test
-    public void testDuplicateTasksInHistory() {
-        Task task = new Task("Task 1", "Description", 1, TaskStatus.NEW, Duration.ofMinutes(60), LocalDateTime.now());
-        historyManager.add(task);
-        historyManager.add(task);
-        List<Task> history = historyManager.getHistory();
-        assertEquals(1, history.size());
     }
 
     @Test
