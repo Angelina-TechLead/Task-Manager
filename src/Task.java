@@ -71,6 +71,12 @@ public class Task {
         return startTime.plus(duration);
     }
 
+    public void setEndTime(LocalDateTime endTime) {
+        if (startTime != null && endTime != null) {
+            this.duration = Duration.between(startTime, endTime);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
