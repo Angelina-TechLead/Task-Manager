@@ -1,6 +1,7 @@
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
+
 public class PrioritizedTasksHandler extends BaseHttpHandler {
     private final Gson gson = new Gson();
     private final TaskManager taskManager = Managers.getDefault();
