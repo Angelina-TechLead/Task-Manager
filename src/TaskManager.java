@@ -1,6 +1,10 @@
 import java.util.List;
 
 public interface TaskManager {
+    static Object getTasks() {
+        return null;
+    }
+
     List<Task> getAllTasks();
 
     List<Epic> getAllEpics();
@@ -36,6 +40,8 @@ public interface TaskManager {
     void deleteEpic(int id);
 
     void deleteSubtasks(int id);
+
+    void deleteSubtask(int subtaskId);
 
     List<Subtask> getSubtasksOfEpic(int epicId);
 
