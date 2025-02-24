@@ -1,0 +1,86 @@
+import java.util.*;
+
+public class InMemoryHistoryManager implements HistoryManager {
+
+    private final Map<Integer, Task> tasks;
+    private final Map<Integer, Node> nodeMap;
+    private Node head;
+    private Node tail;
+    private int idCounter;
+
+    public InMemoryHistoryManager() {
+        tasks = new HashMap<>();
+        nodeMap = new HashMap<>();
+        head = null;
+        tail = null;
+        idCounter = 1;
+    }
+
+    @Override
+    public void add(Task task) {
+        linkLast(task);
+    }
+
+    @Override
+    public void remove(int id) {
+        removeNode(id);
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        return getTasks();
+    }
+
+    private List<Task> getTasks() {
+        List<Task> taskList = new ArrayList<>();
+        Node current = head;
+        while (current != null) {
+            taskList.add(current.task);
+            current = current.next;
+        }
+        return taskList;
+    }
+
+    private void linkLast(Task task) {
+        task.setId(idCounter++);
+        tasks.put(task.getId(), task);
+        Node newNode = new Node(task.getId(), task);
+
+        if (Objects.equals(head, newNode)) {
+            return;
+        }
+
+        if (head == null) {
+            head = newNode;
+        } else {
+            tail.next = newNode;
+            newNode.prev = tail;
+        }
+        tail = newNode;
+        nodeMap.put(task.getId(), newNode);
+    }
+
+    private void removeNode(int id) {
+        if (tasks.containsKey(id)) {
+            Node nodeToRemove = nodeMap.get(id);
+            if (nodeToRemove != null) {
+                if (nodeToRemove == head) {
+                    head = head.next;
+                    if (head != null) {
+                        head.prev = null;
+                    }
+                } else if (nodeToRemove == tail) {
+                    tail = tail.prev;
+                    if (tail != null) {
+                        tail.next = null;
+                    }
+                } else {
+                    nodeToRemove.prev.next = nodeToRemove.next;
+                    nodeToRemove.next.prev = nodeToRemove.prev;
+                }
+                nodeMap.remove(id);
+                tasks.remove(id);
+            }
+        }
+    }
+}
